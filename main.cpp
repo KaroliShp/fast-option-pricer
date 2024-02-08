@@ -1,5 +1,5 @@
 #include <iostream>
-#include "src/NaiveBlackScholes.h"
+#include "src/naive_black_scholes.h"
 
 int main() {
     std::cout << "Hello, World!" << std::endl;

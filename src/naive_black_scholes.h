@@ -5,11 +5,11 @@
 #pragma
 
 #include <cmath>
-#include "NaiveMathHelper.h"
+#include "naive_math_helper.h"
 
 namespace fast_pricing {
 
-struct NaiveBlackScholes
+struct naive_black_scholes
 {
     [[nodiscard]] static inline double call_price(
         double underlying, double strike, double risk_free_rate,
