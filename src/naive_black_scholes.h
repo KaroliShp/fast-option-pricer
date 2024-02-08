@@ -9,7 +9,7 @@
 
 namespace fast_pricing {
 
-struct naive_black_scholes
+struct NaiveBlackScholes
 {
     [[nodiscard]] static inline double call_price(
         double underlying, double strike, double risk_free_rate,

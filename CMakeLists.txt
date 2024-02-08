@@ -6,11 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(GTest REQUIRED)
 enable_testing()
-add_subdirectory(tests)
 
-add_executable(FastOptionPricing main.cpp
-        src/naive_black_scholes.cpp
-        src/naive_black_scholes.h
-        src/naive_math_helper.cpp
-        src/naive_math_helper.h
-)
+add_subdirectory(src)
+add_subdirectory(tests)

@@ -8,7 +8,7 @@
 
 namespace fast_pricing {
 
-struct naive_math_helper
+struct NaiveMathHelper
 {
     [[nodiscard]] static inline double normal_cdf(double x)
     {
