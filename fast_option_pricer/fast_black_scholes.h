@@ -30,7 +30,7 @@ class FastBlackScholes
     {
         constexpr D d;
         constexpr auto lanes = hn::Lanes(d);
-        std::cout << "Lanes: " << hn::Lanes(d) << std::endl;
+        // std::cout << "Lanes: " << hn::Lanes(d) << std::endl;
 
         for (size_t i = 0; i < op.num_options; i += lanes) {
             // Load initial option info
@@ -134,7 +134,7 @@ class FastBlackScholes
     [[nodiscard]] static inline auto calc_put_delta(
         const auto& e_qt, const auto& n_minus_d1)
     {
-        return hn::Sub(hn::Set(d, -1), hn::Mul(e_qt, n_minus_d1));
+        return hn::Mul(hn::Set(d, -1), hn::Mul(e_qt, n_minus_d1));
     }
 };
 
