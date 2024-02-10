@@ -5,9 +5,17 @@
 #include "naive_math_helper.h"
 #include <gtest/gtest.h>
 
-TEST(NaiveMathHelperTest, Testing)
+namespace fast_option_pricer {
+
+class NaiveMathHelperTest : public ::testing::Test
 {
-    auto res = fast_option_pricer::NaiveMathHelper::normal_cdf(0);
+};
+
+TEST_F(NaiveMathHelperTest, NormalCdf)
+{
+    auto res = NaiveMathHelper::normal_cdf(0);
     EXPECT_DOUBLE_EQ(0.5, res);
     EXPECT_TRUE(true);
 }
+
+}  // namespace fast_option_pricer
