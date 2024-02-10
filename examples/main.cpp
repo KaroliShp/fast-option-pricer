@@ -1,5 +1,5 @@
 #include <iostream>
-#include "src/naive_black_scholes.h"
+#include "naive_black_scholes.h"
 
 int main() {
     auto res = fast_pricing::NaiveMathHelper::normal_cdf(0);

@@ -7,5 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(GTest REQUIRED)
 enable_testing()
 
-add_subdirectory(src)
+add_subdirectory(fast_option_pricer)
 add_subdirectory(tests)
+add_subdirectory(examples)
