@@ -16,12 +16,10 @@ namespace fast_option_pricer {
 
 namespace hn = hwy::HWY_NAMESPACE;
 
-class BlackScholesTest : public ::testing::Test
+template <typename T>
+struct RandomInput
 {
-   public:
-    using T = double;
-
-    BlackScholesTest()
+    RandomInput()
         : underlyings(num_options, 0),
           strikes(num_options, 0),
           risk_free_rates(num_options, 0),
@@ -44,13 +42,21 @@ class BlackScholesTest : public ::testing::Test
         return static_cast<T>(std::rand()) / (static_cast<T>(RAND_MAX / HI));
     }
 
-    size_t num_options{100000};
+    size_t num_options{10000000};
     std::vector<T> underlyings;
     std::vector<T> strikes;
     std::vector<T> risk_free_rates;
     std::vector<T> volatilities;
     std::vector<T> times_to_expiry;
     std::vector<T> dividend_yields;
+};
+
+class BlackScholesTest : public ::testing::Test
+{
+   public:
+    using T = double;
+
+    RandomInput<T> r;
 };
 
 TEST_F(BlackScholesTest, ComparePrice)
@@ -65,17 +71,17 @@ TEST_F(BlackScholesTest, ComparePrice)
 
     // Act
     OptionPricing<T> fast_op_call(
-        underlyings, strikes, risk_free_rates, volatilities, times_to_expiry,
-        dividend_yields);
+        r.underlyings, r.strikes, r.risk_free_rates, r.volatilities,
+        r.times_to_expiry, r.dividend_yields);
     OptionPricing<T> fast_op_put(
-        underlyings, strikes, risk_free_rates, volatilities, times_to_expiry,
-        dividend_yields);
+        r.underlyings, r.strikes, r.risk_free_rates, r.volatilities,
+        r.times_to_expiry, r.dividend_yields);
     OptionPricing<T> naive_op_call(
-        underlyings, strikes, risk_free_rates, volatilities, times_to_expiry,
-        dividend_yields);
+        r.underlyings, r.strikes, r.risk_free_rates, r.volatilities,
+        r.times_to_expiry, r.dividend_yields);
     OptionPricing<T> naive_op_put(
-        underlyings, strikes, risk_free_rates, volatilities, times_to_expiry,
-        dividend_yields);
+        r.underlyings, r.strikes, r.risk_free_rates, r.volatilities,
+        r.times_to_expiry, r.dividend_yields);
 
     // Assert
     FastBlackScholes<T, hn::ScalableTag<T>>::price<true>(fast_op_call);
@@ -83,7 +89,8 @@ TEST_F(BlackScholesTest, ComparePrice)
     EXPECT_EQ(fast_op_call.prices.size(), naive_op_call.prices.size());
     EXPECT_EQ(fast_op_call.deltas.size(), naive_op_call.deltas.size());
     for (auto i = 0; i < fast_op_call.prices.size(); ++i) {
-        //std::cout << "Elem: " << i << std::endl;
+        // std::cout << "Elem: " << i << ", " << fast_op_call.prices[i] << ", "
+        // << fast_op_call.deltas[i] << std::endl;
         EXPECT_NEAR(fast_op_call.prices[i], naive_op_call.prices[i], 1e-5);
         EXPECT_NEAR(fast_op_call.deltas[i], naive_op_call.deltas[i], 1e-5);
     }
@@ -93,7 +100,7 @@ TEST_F(BlackScholesTest, ComparePrice)
     EXPECT_EQ(fast_op_put.prices.size(), naive_op_put.prices.size());
     EXPECT_EQ(fast_op_put.deltas.size(), naive_op_put.deltas.size());
     for (auto i = 0; i < fast_op_put.prices.size(); ++i) {
-        //std::cout << "Elem: " << i << std::endl;
+        // std::cout << "Elem: " << i << std::endl;
         EXPECT_NEAR(fast_op_put.prices[i], naive_op_put.prices[i], 1e-5);
         EXPECT_NEAR(fast_op_put.deltas[i], naive_op_put.deltas[i], 1e-5);
     }
@@ -103,16 +110,10 @@ static void BM_NaivePrice(benchmark::State& state)
 {
     // Perform setup here
     using T = double;
-
-    std::vector<T> spot{110.0, 110.0, 110.0, 110.0};
-    std::vector<T> strike{120.0, 120.0, 120.0, 120.0};
-    std::vector<T> years_to_expiry(spot.size(), 25.0 / 252.0);
-    std::vector<T> risk_free_rate(spot.size(), 0.02);
-    std::vector<T> volatility{0.15, 0.16, 0.17, 0.18};
-    std::vector<T> dividend_yield{0.05, 0.05, 0.05, 0.05};
+    RandomInput<T> r;
     OptionPricing<T> naive_op(
-        spot, strike, risk_free_rate, volatility, years_to_expiry,
-        dividend_yield);
+        r.underlyings, r.strikes, r.risk_free_rates, r.volatilities,
+        r.times_to_expiry, r.dividend_yields);
 
     for (auto _ : state) {
         // This code gets timed
@@ -127,16 +128,10 @@ static void BM_FastPrice(benchmark::State& state)
 {
     // Perform setup here
     using T = double;
-
-    std::vector<T> spot{110.0, 110.0, 110.0, 110.0};
-    std::vector<T> strike{120.0, 120.0, 120.0, 120.0};
-    std::vector<T> years_to_expiry(spot.size(), 25.0 / 252.0);
-    std::vector<T> risk_free_rate(spot.size(), 0.02);
-    std::vector<T> volatility{0.15, 0.16, 0.17, 0.18};
-    std::vector<T> dividend_yield{0.05, 0.05, 0.05, 0.05};
+    RandomInput<T> r;
     OptionPricing<T> fast_op(
-        spot, strike, risk_free_rate, volatility, years_to_expiry,
-        dividend_yield);
+        r.underlyings, r.strikes, r.risk_free_rates, r.volatilities,
+        r.times_to_expiry, r.dividend_yields);
 
     for (auto _ : state) {
         // This code gets timed
