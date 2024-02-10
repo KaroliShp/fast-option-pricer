@@ -5,6 +5,7 @@
 #pragma
 
 #include <cmath>
+#include "hwy/highway.h"
 
 namespace fast_pricing {
 

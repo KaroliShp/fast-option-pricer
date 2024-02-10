@@ -4,3 +4,8 @@ add_library(FastOptionPricingLib
 )
 
 target_include_directories(FastOptionPricingLib PUBLIC .)
+
+#set(CMAKE_TOOLCHAIN_FILE /Users/karolis/.vcpkg-clion/vcpkg/scripts/buildsystems/vcpkg.cmake)
+find_package(hwy CONFIG REQUIRED)
+
+target_link_libraries(FastOptionPricingLib PUBLIC hwy::hwy)
