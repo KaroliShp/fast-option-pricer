@@ -5,32 +5,29 @@
 #pragma once
 
 #include <hwy/highway.h>
-namespace hn = hwy::HWY_NAMESPACE;
+#include "math-inl.h"
 
 namespace fast_option_pricer {
 
-struct FastMathHelper
+namespace hn = hwy::HWY_NAMESPACE;
+
+class FastMathHelper
 {
-    explicit FastMathHelper()
+   public:
+    template <typename T, unsigned long Lanes>
+    static inline auto normal_cdf(const auto& x, const auto& d)
     {
-    }
+        auto res = hn::Mul(hn::Set(d, -1), x);
 
-    [[nodiscard]] double normal_cdf(double x)
-    {
-        return 0.5;
-        // return 0.5 * std::erfc(-x / std::sqrt(2));
-    }
+        // Highway math-inl.h does not have erf or erfc
+        std::array<T, Lanes> tmp;
+        hn::Store(res, d, tmp.data());
+        for (auto& el : tmp) {
+            el = std::erfc(el);
+        }
 
-    [[nodiscard]] static inline double d1(
-        double sigma_root_t, double underlying, double strike,
-        double risk_free_rate, double time_to_expiry)
-    {
-        return 0;
-    }
-
-    [[nodiscard]] static inline double d2(double d1, double sigma_root_t)
-    {
-        return 0;
+        res = hn::Mul(hn::Set(d, 0.5), res);
+        return res;
     }
 };
 
