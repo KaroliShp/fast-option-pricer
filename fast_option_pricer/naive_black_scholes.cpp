@@ -4,7 +4,7 @@
 
 #include "naive_black_scholes.h"
 
-namespace fast_pricing {
+namespace fast_option_pricer {
 
 inline double NaiveBlackScholes::call_price(
     double underlying, double strike, double risk_free_rate, double volatility,
@@ -53,4 +53,4 @@ inline double NaiveBlackScholes::put_delta(
                      time_to_expiry);
 }
 
-}  // namespace fast_pricing
+}  // namespace fast_option_pricer

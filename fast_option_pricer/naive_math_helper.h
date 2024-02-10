@@ -7,7 +7,7 @@
 #include <cmath>
 #include "hwy/highway.h"
 
-namespace fast_pricing {
+namespace fast_option_pricer {
 
 struct NaiveMathHelper
 {
@@ -32,4 +32,4 @@ struct NaiveMathHelper
     }
 };
 
-}  // namespace fast_pricing
+}  // namespace fast_option_pricer

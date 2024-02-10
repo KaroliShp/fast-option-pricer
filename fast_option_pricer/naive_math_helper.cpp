@@ -4,5 +4,5 @@
 
 #include "naive_math_helper.h"
 
-namespace fast_pricing {
-}  // namespace fast_pricing
+namespace fast_option_pricer {
+}  // namespace fast_option_pricer

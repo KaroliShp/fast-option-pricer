@@ -7,7 +7,7 @@
 #include <cmath>
 #include "naive_math_helper.h"
 
-namespace fast_pricing {
+namespace fast_option_pricer {
 
 struct NaiveBlackScholes
 {
@@ -28,4 +28,4 @@ struct NaiveBlackScholes
         double volatility, double time_to_expiry);
 };
 
-}  // namespace fast_pricing
+}  // namespace fast_option_pricer

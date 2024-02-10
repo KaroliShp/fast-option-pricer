@@ -7,7 +7,7 @@
 
 TEST(NaiveMathHelperTest, Testing)
 {
-    auto res = fast_pricing::NaiveMathHelper::normal_cdf(0);
+    auto res = fast_option_pricer::NaiveMathHelper::normal_cdf(0);
     EXPECT_DOUBLE_EQ(0.5, res);
     EXPECT_TRUE(true);
 }
