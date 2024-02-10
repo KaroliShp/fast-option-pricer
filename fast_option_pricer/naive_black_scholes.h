@@ -16,14 +16,14 @@ class NaiveBlackScholes
     template <bool Call = true>
     static void price(OptionPricing<double>& op)
     {
-        for (size_t i = 0; i < op.underlyings.size(); ++i) {
+        for (size_t i = 0; i < op.num_options; ++i) {
             // Calculate shared constants
             const double sigma_root_t =
                 op.volatilities[i] * sqrt(op.times_to_expiry[i]);
             const double e_qt =
-                exp(op.times_to_expiry[i] * op.dividend_yields[i]);
+                exp(-op.times_to_expiry[i] * op.dividend_yields[i]);
             const double e_rt =
-                exp(op.times_to_expiry[i] * op.risk_free_rates[i]);
+                exp(-op.times_to_expiry[i] * op.risk_free_rates[i]);
 
             const double d1 = calc_d1(
                 op.underlyings[i], op.strikes[i], op.risk_free_rates[i],
@@ -50,8 +50,8 @@ class NaiveBlackScholes
     }
 
     [[nodiscard]] static inline double calc_d1(
-        double sigma_root_t, double underlying, double strike,
-        double risk_free_rate, double time_to_expiry)
+        double underlying, double strike, double risk_free_rate,
+        double time_to_expiry, double sigma_root_t)
     {
         return ((std::log(underlying / strike) +
                  risk_free_rate * time_to_expiry) /

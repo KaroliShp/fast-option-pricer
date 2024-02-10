@@ -17,7 +17,7 @@ class FastMathHelper
     template <typename T, unsigned long Lanes>
     static inline auto normal_cdf(const auto& x, const auto& d)
     {
-        auto res = hn::Mul(hn::Set(d, -1), x);
+        auto res = hn::Div(hn::Mul(hn::Set(d, -1), x), hn::Sqrt(hn::Set(d, 2)));
 
         // Highway math-inl.h does not have erf or erfc
         std::array<T, Lanes> tmp;
@@ -26,7 +26,7 @@ class FastMathHelper
             el = std::erfc(el);
         }
 
-        res = hn::Mul(hn::Set(d, 0.5), res);
+        res = hn::Mul(hn::Set(d, 0.5), hn::Load(d, tmp.data()));
         return res;
     }
 };

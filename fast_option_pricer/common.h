@@ -14,9 +14,11 @@ struct OptionPricing
     OptionPricing() = default;
 
     OptionPricing(
-        std::vector<T> underlyings, std::vector<T> strikes,
-        std::vector<T> risk_free_rates, std::vector<T> volatilities,
-        std::vector<T> times_to_expiry, std::vector<T> dividend_yields)
+        const std::vector<T>& underlyings, const std::vector<T>& strikes,
+        const std::vector<T>& risk_free_rates,
+        const std::vector<T>& volatilities,
+        const std::vector<T>& times_to_expiry,
+        const std::vector<T>& dividend_yields)
         : num_options(underlyings.size()),
           underlyings(underlyings),
           strikes(strikes),
@@ -34,13 +36,13 @@ struct OptionPricing
         assert(num_options == dividend_yields.size());
     }
 
-    size_t num_options;
-    std::vector<T> underlyings;
-    std::vector<T> strikes;
-    std::vector<T> risk_free_rates;
-    std::vector<T> volatilities;
-    std::vector<T> times_to_expiry;
-    std::vector<T> dividend_yields;
+    const size_t num_options;
+    const std::vector<T> underlyings;
+    const std::vector<T> strikes;
+    const std::vector<T> risk_free_rates;
+    const std::vector<T> volatilities;
+    const std::vector<T> times_to_expiry;
+    const std::vector<T> dividend_yields;
     std::vector<T> prices;
     std::vector<T> deltas;
 };

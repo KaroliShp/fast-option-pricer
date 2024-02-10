@@ -48,10 +48,14 @@ class FastBlackScholes
             // Calculate shared constants
             const VecT sigma_root_t =
                 hn::Mul(volatility, hn::Sqrt(time_to_expiry));
-            const VecT e_qt =
-                hn::Exp(d, hn::Mul(time_to_expiry, dividend_yield));
-            const VecT e_rt =
-                hn::Exp(d, hn::Mul(time_to_expiry, risk_free_rate));
+            const VecT e_qt = hn::Exp(
+                d,
+                hn::Mul(
+                    hn::Set(d, -1), hn::Mul(time_to_expiry, dividend_yield)));
+            const VecT e_rt = hn::Exp(
+                d,
+                hn::Mul(
+                    hn::Set(d, -1), hn::Mul(time_to_expiry, risk_free_rate)));
 
             const VecT d1 = calc_d1<d>(
                 underlying, strike, risk_free_rate, time_to_expiry,
