@@ -33,7 +33,6 @@ class NaiveBlackScholes
 
             const double d2 = calc_d2(d1, sigma_root_t);
             const double n_d2 = NaiveMathHelper::normal_cdf(d2);
-            const double n_minus_d2 = NaiveMathHelper::normal_cdf(-1 * d2);
 
             // Actual price, greeks etc
             if constexpr (Call) {
@@ -41,6 +40,7 @@ class NaiveBlackScholes
                     op.underlyings[i], e_qt, n_d1, op.strikes[i], e_rt, n_d2);
                 op.deltas[i] = calc_call_delta(e_qt, n_d1);
             } else {
+                const double n_minus_d2 = NaiveMathHelper::normal_cdf(-1 * d2);
                 op.prices[i] = calc_put_price(
                     op.underlyings[i], e_qt, n_minus_d1, op.strikes[i], e_rt,
                     n_minus_d2);

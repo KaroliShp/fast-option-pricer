@@ -66,8 +66,6 @@ class FastBlackScholes
 
             const VecT d2 = calc_d2(d1, sigma_root_t);
             const VecT n_d2 = FastMathHelper::normal_cdf<T, lanes>(d2, d);
-            const VecT n_minus_d2 = FastMathHelper::normal_cdf<T, lanes>(
-                hn::Mul(hn::Set(d, -1), d2), d);
 
             // Actual price, greeks etc
             VecT price;
@@ -77,6 +75,8 @@ class FastBlackScholes
                     calc_call_price(underlying, e_qt, n_d1, strike, e_rt, n_d2);
                 delta = calc_call_delta(e_qt, n_d1);
             } else {
+                const VecT n_minus_d2 = FastMathHelper::normal_cdf<T, lanes>(
+                    hn::Mul(hn::Set(d, -1), d2), d);
                 price = calc_put_price(
                     underlying, e_qt, n_minus_d1, strike, e_rt, n_minus_d2);
                 delta = calc_put_delta<d>(e_qt, n_minus_d1);
