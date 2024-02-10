@@ -7,25 +7,13 @@
 #include <hwy/highway.h>
 #include <iostream>
 #include <type_traits>
+#include "common.h"
 #include "fast_math_helper.h"
 #include "math-inl.h"
 
 namespace fast_option_pricer {
 
 namespace hn = hwy::HWY_NAMESPACE;
-
-template <typename T>
-struct OptionPricing
-{
-    std::vector<T> underlyings;
-    std::vector<T> strikes;
-    std::vector<T> risk_free_rates;
-    std::vector<T> volatilities;
-    std::vector<T> times_to_expiry;
-    std::vector<T> dividend_yields;
-    std::vector<T> price;
-    std::vector<T> delta;
-};
 
 template <typename T>
 concept IsFloatOrDouble =
@@ -44,15 +32,7 @@ class FastBlackScholes
         constexpr auto lanes = hn::Lanes(d);
         std::cout << "Lanes: " << hn::Lanes(d) << std::endl;
 
-        assert(op.underlyings.size() == op.strikes.size());
-        assert(op.underlyings.size() == op.risk_free_rates.size());
-        assert(op.underlyings.size() == op.volatilities.size());
-        assert(op.underlyings.size() == op.times_to_expiry.size());
-        assert(op.underlyings.size() == op.dividend_yields.size());
-        assert(op.underlyings.size() == op.price.size());
-        assert(op.underlyings.size() == op.delta.size());
-
-        for (size_t i = 0; i < op.underlyings.size(); i += lanes) {
+        for (size_t i = 0; i < op.num_options; i += lanes) {
             // Load initial option info
             // TODO take care of the last vector in case it's not 0 mod lanes
             const VecT underlying = hn::Load(d, op.underlyings.data() + i);
@@ -97,8 +77,8 @@ class FastBlackScholes
                     underlying, e_qt, n_minus_d1, strike, e_rt, n_minus_d2);
                 delta = calc_put_delta<d>(e_qt, n_minus_d1);
             }
-            hn::Store(price, d, op.price.data() + i);
-            hn::Store(delta, d, op.delta.data() + i);
+            hn::Store(price, d, op.prices.data() + i);
+            hn::Store(delta, d, op.deltas.data() + i);
         }
     }
 

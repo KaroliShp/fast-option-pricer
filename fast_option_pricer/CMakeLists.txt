@@ -4,6 +4,7 @@ add_library(FastOptionPricingLib
         fast_math_helper.cpp
         fast_black_scholes.h
         math-inl.h
+        common.h
 )
 
 target_include_directories(FastOptionPricingLib PUBLIC .)

@@ -21,15 +21,7 @@ class FastBlackScholesTest : public ::testing::Test
 TEST_F(FastBlackScholesTest, Price)
 {
     std::vector<T> input{0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0};
-    OptionPricing<T> op{
-        .underlyings = input,
-        .strikes = input,
-        .risk_free_rates = input,
-        .volatilities = input,
-        .times_to_expiry = input,
-        .dividend_yields = input,
-        .price = std::vector<T>(input.size(), 0),
-        .delta = std::vector<T>(input.size(), 0)};
+    OptionPricing<T> op(input, input, input, input, input, input);
 
     FastBlackScholes<T, hn::ScalableTag<T>>::price<true>(op);
     EXPECT_TRUE(true);
