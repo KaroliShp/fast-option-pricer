@@ -116,13 +116,29 @@ TEST(BlackScholesTestDouble, ComparePrice)
     // Assert
     EXPECT_EQ(fast_op_call.prices.size(), naive_op_call.prices.size());
     EXPECT_EQ(fast_op_call.deltas.size(), naive_op_call.deltas.size());
+    EXPECT_EQ(fast_op_call.vegas.size(), naive_op_call.vegas.size());
+    EXPECT_EQ(fast_op_call.thetas.size(), naive_op_call.thetas.size());
+    EXPECT_EQ(fast_op_call.gammas.size(), naive_op_call.gammas.size());
+    EXPECT_EQ(fast_op_call.rhos.size(), naive_op_call.rhos.size());
     EXPECT_EQ(fast_op_put.prices.size(), naive_op_put.prices.size());
     EXPECT_EQ(fast_op_put.deltas.size(), naive_op_put.deltas.size());
+    EXPECT_EQ(fast_op_put.vegas.size(), naive_op_put.vegas.size());
+    EXPECT_EQ(fast_op_put.thetas.size(), naive_op_put.thetas.size());
+    EXPECT_EQ(fast_op_put.gammas.size(), naive_op_put.gammas.size());
+    EXPECT_EQ(fast_op_put.rhos.size(), naive_op_put.rhos.size());
     for (auto i = 0; i < fast_op_call.prices.size(); ++i) {
         EXPECT_NEAR(fast_op_call.prices[i], naive_op_call.prices[i], 1e-5);
         EXPECT_NEAR(fast_op_call.deltas[i], naive_op_call.deltas[i], 1e-5);
+        EXPECT_NEAR(fast_op_call.vegas[i], naive_op_call.vegas[i], 1e-5);
+        EXPECT_NEAR(fast_op_call.thetas[i], naive_op_call.thetas[i], 1e-5);
+        EXPECT_NEAR(fast_op_call.gammas[i], naive_op_call.gammas[i], 1e-5);
+        EXPECT_NEAR(fast_op_call.rhos[i], naive_op_call.rhos[i], 1e-5);
         EXPECT_NEAR(fast_op_put.prices[i], naive_op_put.prices[i], 1e-5);
         EXPECT_NEAR(fast_op_put.deltas[i], naive_op_put.deltas[i], 1e-5);
+        EXPECT_NEAR(fast_op_put.vegas[i], naive_op_put.vegas[i], 1e-5);
+        EXPECT_NEAR(fast_op_put.thetas[i], naive_op_put.thetas[i], 1e-5);
+        EXPECT_NEAR(fast_op_put.gammas[i], naive_op_put.gammas[i], 1e-5);
+        EXPECT_NEAR(fast_op_put.rhos[i], naive_op_put.rhos[i], 1e-5);
     }
 }
 

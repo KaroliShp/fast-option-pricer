@@ -15,7 +15,7 @@ class FastMathHelper
 {
    public:
     template <typename T, unsigned long Lanes>
-    static inline auto normal_cdf(const auto& x, const auto& d)
+    [[nodiscard]] static inline auto normal_cdf(const auto& x, const auto& d)
     {
         auto res = hn::Div(hn::Mul(hn::Set(d, -1), x), hn::Sqrt(hn::Set(d, 2)));
 
@@ -28,6 +28,15 @@ class FastMathHelper
 
         res = hn::Mul(hn::Set(d, 0.5), hn::Load(d, tmp.data()));
         return res;
+    }
+
+    template <typename T>
+    [[nodiscard]] static inline auto normal_pdf(const auto& x, const auto& d)
+    {
+        return hn::Mul(
+            hn::Set(d, static_cast<T>(0.3989422804014327)),
+            hn::Exp(
+                d, hn::Mul(hn::Set(d, static_cast<T>(-0.5)), hn::Mul(x, x))));
     }
 };
 

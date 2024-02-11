@@ -64,21 +64,39 @@ class FastBlackScholes
             const VecT n_d2 = FastMathHelper::normal_cdf<T, lanes>(d2, d);
 
             // Actual price, greeks etc
-            VecT price;
-            VecT delta;
             if constexpr (Call) {
-                price =
+                const VecT price =
                     calc_call_price(underlying, e_qt, n_d1, strike, e_rt, n_d2);
-                delta = calc_call_delta(e_qt, n_d1);
+                hn::Store(price, d, op.prices.data() + i);
+
+                const VecT delta = calc_call_delta(e_qt, n_d1);
+                hn::Store(delta, d, op.deltas.data() + i);
+
+                const VecT rho =
+                    calc_call_rho<d>(strike, time_to_expiry, e_rt, n_d2);
+                hn::Store(rho, d, op.rhos.data() + i);
             } else {
                 const VecT n_minus_d2 = FastMathHelper::normal_cdf<T, lanes>(
                     hn::Mul(hn::Set(d, -1), d2), d);
-                price = calc_put_price(
+
+                const VecT price = calc_put_price(
                     underlying, e_qt, n_minus_d1, strike, e_rt, n_minus_d2);
-                delta = calc_put_delta<d>(e_qt, n_minus_d1);
+                hn::Store(price, d, op.prices.data() + i);
+
+                const VecT delta = calc_put_delta<d>(e_qt, n_minus_d1);
+                hn::Store(delta, d, op.deltas.data() + i);
+
+                const VecT rho =
+                    calc_put_rho<d>(strike, time_to_expiry, e_rt, n_minus_d2);
+                hn::Store(rho, d, op.rhos.data() + i);
             }
-            hn::Store(price, d, op.prices.data() + i);
-            hn::Store(delta, d, op.deltas.data() + i);
+
+            const VecT pdf_d1 = FastMathHelper::normal_pdf<T>(d1, d);
+            const VecT gamma = calc_gamma(e_qt, strike, sigma_root_t, pdf_d1);
+            hn::Store(gamma, d, op.gammas.data() + i);
+            const VecT vega =
+                calc_vega<d>(underlying, e_qt, time_to_expiry, pdf_d1);
+            hn::Store(vega, d, op.vegas.data() + i);
         }
     }
 
@@ -132,6 +150,47 @@ class FastBlackScholes
     {
         return hn::Mul(hn::Set(d, -1), hn::Mul(e_qt, n_minus_d1));
     }
+
+    [[nodiscard]] static inline auto calc_gamma(
+        auto e_qt, auto underlying, auto sigma_root_t, auto pdf_d1)
+    {
+        return hn::Mul(
+            hn::Div(e_qt, hn::Mul(underlying, sigma_root_t)), pdf_d1);
+    }
+
+    template <D d>
+    [[nodiscard]] static inline auto calc_vega(
+        auto underlying, auto e_qt, auto time_to_expiry, auto pdf_d1)
+    {
+        return hn::Mul(
+            hn::Set(d, C),
+            hn::Mul(
+                underlying,
+                hn::Mul(e_qt, hn::Mul(hn::Sqrt(time_to_expiry), pdf_d1))));
+    }
+
+    template <D d>
+    [[nodiscard]] static inline auto calc_call_rho(
+        auto strike, auto time_to_expiry, auto e_rt, auto n_d2)
+    {
+        return hn::Mul(
+            hn::Set(d, C),
+            hn::Mul(strike, hn::Mul(time_to_expiry, hn::Mul(e_rt, n_d2))));
+    }
+
+    template <D d>
+    [[nodiscard]] static inline auto calc_put_rho(
+        auto strike, auto time_to_expiry, auto e_rt, auto n_minus_d2)
+    {
+        return hn::Mul(
+            hn::Set(d, C_minus),
+            hn::Mul(
+                strike, hn::Mul(time_to_expiry, hn::Mul(e_rt, n_minus_d2))));
+    }
+
+   protected:
+    static constexpr T C = 1.0 / 100.0;
+    static constexpr T C_minus = -1.0 / 100.0;
 };
 
 }  // namespace fast_option_pricer
