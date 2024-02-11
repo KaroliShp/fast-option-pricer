@@ -5,5 +5,4 @@
 #include "naive_black_scholes.h"
 
 namespace fast_option_pricer {
-
 }  // namespace fast_option_pricer

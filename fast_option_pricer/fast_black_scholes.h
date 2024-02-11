@@ -15,10 +15,6 @@ namespace fast_option_pricer {
 
 namespace hn = hwy::HWY_NAMESPACE;
 
-template <typename T>
-concept IsFloatOrDouble =
-    std::is_same<T, float>::value || std::is_same<T, double>::value;
-
 template <IsFloatOrDouble T = double, typename D = hn::ScalableTag<T>>
 class FastBlackScholes
 {

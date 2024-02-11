@@ -11,7 +11,7 @@ namespace fast_option_pricer {
 
 struct NaiveMathHelper
 {
-    [[nodiscard]] static inline double normal_cdf(double x)
+    [[nodiscard]] static inline auto normal_cdf(auto x)
     {
         return 0.5 * std::erfc(-x / std::sqrt(2));
     }

@@ -11,8 +11,6 @@ namespace fast_option_pricer {
 template <typename T>
 struct OptionPricing
 {
-    OptionPricing() = default;
-
     OptionPricing(
         const std::vector<T>& underlyings, const std::vector<T>& strikes,
         const std::vector<T>& risk_free_rates,
@@ -46,5 +44,9 @@ struct OptionPricing
     std::vector<T> prices;
     std::vector<T> deltas;
 };
+
+template <typename T>
+concept IsFloatOrDouble =
+    std::is_same<T, float>::value || std::is_same<T, double>::value;
 
 }  // namespace fast_option_pricer
