@@ -14,10 +14,12 @@ namespace hn = hwy::HWY_NAMESPACE;
 class FastMathHelper
 {
    public:
-    template <typename T, unsigned long Lanes>
-    [[nodiscard]] static inline auto normal_cdf(const auto& x, const auto& d)
+    template <typename VecT, typename T, unsigned long Lanes, typename D, D d>
+    [[nodiscard]] static inline VecT normal_cdf(const VecT& x)
     {
-        auto res = hn::Div(hn::Mul(hn::Set(d, -1), x), hn::Sqrt(hn::Set(d, 2)));
+        VecT res = hn::Div(
+            hn::Mul(hn::Set(d, static_cast<T>(-1.0)), x),
+            hn::Sqrt(hn::Set(d, static_cast<T>(2.0))));
 
         // Highway math-inl.h does not have erf or erfc
         std::array<T, Lanes> tmp;
@@ -30,8 +32,8 @@ class FastMathHelper
         return res;
     }
 
-    template <typename T>
-    [[nodiscard]] static inline auto normal_pdf(const auto& x, const auto& d)
+    template <typename VecT, typename T, typename D, D d>
+    [[nodiscard]] static inline VecT normal_pdf(const VecT& x)
     {
         return hn::Mul(
             hn::Set(d, static_cast<T>(0.3989422804014327)),

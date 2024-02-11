@@ -1,6 +1,6 @@
-# FastOptionPricing
+# Fast Option Pricing [WIP]
 
-TODO
+SIMD-based option pricing (Black Scholes) approach.
 
 ## Dependencies
 

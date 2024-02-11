@@ -45,65 +45,67 @@ class FastBlackScholes
             const VecT sigma_root_t =
                 hn::Mul(volatility, hn::Sqrt(time_to_expiry));
             const VecT e_qt = hn::Exp(
-                d,
-                hn::Mul(
-                    hn::Set(d, -1), hn::Mul(time_to_expiry, dividend_yield)));
+                d, hn::Mul(
+                       hn::Set(d, static_cast<T>(-1.0)),
+                       hn::Mul(time_to_expiry, dividend_yield)));
             const VecT e_rt = hn::Exp(
-                d,
-                hn::Mul(
-                    hn::Set(d, -1), hn::Mul(time_to_expiry, risk_free_rate)));
+                d, hn::Mul(
+                       hn::Set(d, static_cast<T>(-1.0)),
+                       hn::Mul(time_to_expiry, risk_free_rate)));
 
             const VecT d1 = calc_d1<d>(
                 underlying, strike, risk_free_rate, time_to_expiry,
                 sigma_root_t);
-            const VecT n_d1 = FastMathHelper::normal_cdf<T, lanes>(d1, d);
-            const VecT n_minus_d1 = FastMathHelper::normal_cdf<T, lanes>(
-                hn::Mul(hn::Set(d, -1), d1), d);
+            const VecT n_d1 =
+                FastMathHelper::normal_cdf<VecT, T, lanes, D, d>(d1);
 
             const VecT d2 = calc_d2(d1, sigma_root_t);
-            const VecT n_d2 = FastMathHelper::normal_cdf<T, lanes>(d2, d);
+            const VecT n_d2 =
+                FastMathHelper::normal_cdf<VecT, T, lanes, D, d>(d2);
 
             // Actual price, greeks etc
             if constexpr (Call) {
-                const VecT price =
-                    calc_call_price(underlying, e_qt, n_d1, strike, e_rt, n_d2);
-                hn::Store(price, d, op.prices.data() + i);
-
-                const VecT delta = calc_call_delta(e_qt, n_d1);
-                hn::Store(delta, d, op.deltas.data() + i);
-
-                const VecT rho =
-                    calc_call_rho<d>(strike, time_to_expiry, e_rt, n_d2);
-                hn::Store(rho, d, op.rhos.data() + i);
+                hn::Store(
+                    calc_call_price(underlying, e_qt, n_d1, strike, e_rt, n_d2),
+                    d, op.prices.data() + i);
+                hn::Store(calc_call_delta(e_qt, n_d1), d, op.deltas.data() + i);
+                hn::Store(
+                    calc_call_rho<d>(strike, time_to_expiry, e_rt, n_d2), d,
+                    op.rhos.data() + i);
             } else {
-                const VecT n_minus_d2 = FastMathHelper::normal_cdf<T, lanes>(
-                    hn::Mul(hn::Set(d, -1), d2), d);
+                const VecT n_minus_d1 = hn::Mul(
+                    hn::Set(d, static_cast<T>(-1.0)),
+                    hn::Sub(n_d1, hn::Set(d, static_cast<T>(1.0))));
+                const VecT n_minus_d2 = hn::Mul(
+                    hn::Set(d, static_cast<T>(-1.0)),
+                    hn::Sub(n_d2, hn::Set(d, static_cast<T>(1.0))));
 
-                const VecT price = calc_put_price(
-                    underlying, e_qt, n_minus_d1, strike, e_rt, n_minus_d2);
-                hn::Store(price, d, op.prices.data() + i);
-
-                const VecT delta = calc_put_delta<d>(e_qt, n_minus_d1);
-                hn::Store(delta, d, op.deltas.data() + i);
-
-                const VecT rho =
-                    calc_put_rho<d>(strike, time_to_expiry, e_rt, n_minus_d2);
-                hn::Store(rho, d, op.rhos.data() + i);
+                hn::Store(
+                    calc_put_price(
+                        underlying, e_qt, n_minus_d1, strike, e_rt, n_minus_d2),
+                    d, op.prices.data() + i);
+                hn::Store(
+                    calc_put_delta<d>(e_qt, n_minus_d1), d,
+                    op.deltas.data() + i);
+                hn::Store(
+                    calc_put_rho<d>(strike, time_to_expiry, e_rt, n_minus_d2),
+                    d, op.rhos.data() + i);
             }
 
-            const VecT pdf_d1 = FastMathHelper::normal_pdf<T>(d1, d);
-            const VecT gamma = calc_gamma(e_qt, strike, sigma_root_t, pdf_d1);
-            hn::Store(gamma, d, op.gammas.data() + i);
-            const VecT vega =
-                calc_vega<d>(underlying, e_qt, time_to_expiry, pdf_d1);
-            hn::Store(vega, d, op.vegas.data() + i);
+            const VecT pdf_d1 = FastMathHelper::normal_pdf<VecT, T, D, d>(d1);
+            hn::Store(
+                calc_gamma(e_qt, strike, sigma_root_t, pdf_d1), d,
+                op.gammas.data() + i);
+            hn::Store(
+                calc_vega<d>(underlying, e_qt, time_to_expiry, pdf_d1), d,
+                op.vegas.data() + i);
         }
     }
 
     template <D d>
-    [[nodiscard]] static inline auto calc_d1(
-        const auto& underlying, const auto& strike, const auto& risk_free_rate,
-        const auto& time_to_expiry, const auto& sigma_root_t)
+    [[nodiscard]] static inline VecT calc_d1(
+        const VecT& underlying, const VecT& strike, const VecT& risk_free_rate,
+        const VecT& time_to_expiry, const VecT& sigma_root_t)
     {
         return hn::Add(
             hn::Div(
@@ -111,56 +113,57 @@ class FastBlackScholes
                     hn::Log(d, hn::Div(underlying, strike)),
                     hn::Mul(risk_free_rate, time_to_expiry)),
                 sigma_root_t),
-            hn::Mul(hn::Set(d, 0.5), sigma_root_t));
+            hn::Mul(hn::Set(d, static_cast<T>(0.5)), sigma_root_t));
     }
 
-    [[nodiscard]] static inline auto calc_d2(
-        const auto& d1, const auto& sigma_root_t)
+    [[nodiscard]] static inline VecT calc_d2(
+        const VecT& d1, const VecT& sigma_root_t)
     {
         return hn::Sub(d1, sigma_root_t);
     }
 
-    [[nodiscard]] static inline auto calc_call_price(
-        const auto& underlying, const auto& e_qt, const auto& n_d1,
-        const auto& strike, const auto& e_rt, const auto& n_d2)
+    [[nodiscard]] static inline VecT calc_call_price(
+        const VecT& underlying, const VecT& e_qt, const VecT& n_d1,
+        const VecT& strike, const VecT& e_rt, const VecT& n_d2)
     {
         return hn::Sub(
             hn::Mul(hn::Mul(underlying, e_qt), n_d1),
             hn::Mul(hn::Mul(strike, e_rt), n_d2));
     }
 
-    [[nodiscard]] static inline auto calc_put_price(
-        const auto& underlying, const auto& e_qt, const auto& n_minus_d1,
-        const auto& strike, const auto& e_rt, const auto& n_minus_d2)
+    [[nodiscard]] static inline VecT calc_put_price(
+        const VecT& underlying, const VecT& e_qt, const VecT& n_minus_d1,
+        const VecT& strike, const VecT& e_rt, const VecT& n_minus_d2)
     {
         return hn::Sub(
             hn::Mul(hn::Mul(strike, e_rt), n_minus_d2),
             hn::Mul(hn::Mul(underlying, e_qt), n_minus_d1));
     }
 
-    [[nodiscard]] static inline auto calc_call_delta(
-        const auto& e_qt, const auto& n_d1)
+    [[nodiscard]] static inline VecT calc_call_delta(
+        const VecT& e_qt, const VecT& n_d1)
     {
         return hn::Mul(e_qt, n_d1);
     }
 
     template <D d>
-    [[nodiscard]] static inline auto calc_put_delta(
-        const auto& e_qt, const auto& n_minus_d1)
+    [[nodiscard]] static inline VecT calc_put_delta(
+        const VecT& e_qt, const VecT& n_minus_d1)
     {
-        return hn::Mul(hn::Set(d, -1), hn::Mul(e_qt, n_minus_d1));
+        return hn::Mul(
+            hn::Set(d, static_cast<T>(-1.0)), hn::Mul(e_qt, n_minus_d1));
     }
 
-    [[nodiscard]] static inline auto calc_gamma(
-        auto e_qt, auto underlying, auto sigma_root_t, auto pdf_d1)
+    [[nodiscard]] static inline VecT calc_gamma(
+        VecT e_qt, VecT underlying, VecT sigma_root_t, VecT pdf_d1)
     {
         return hn::Mul(
             hn::Div(e_qt, hn::Mul(underlying, sigma_root_t)), pdf_d1);
     }
 
     template <D d>
-    [[nodiscard]] static inline auto calc_vega(
-        auto underlying, auto e_qt, auto time_to_expiry, auto pdf_d1)
+    [[nodiscard]] static inline VecT calc_vega(
+        VecT underlying, VecT e_qt, VecT time_to_expiry, VecT pdf_d1)
     {
         return hn::Mul(
             hn::Set(d, C),
@@ -170,8 +173,8 @@ class FastBlackScholes
     }
 
     template <D d>
-    [[nodiscard]] static inline auto calc_call_rho(
-        auto strike, auto time_to_expiry, auto e_rt, auto n_d2)
+    [[nodiscard]] static inline VecT calc_call_rho(
+        VecT strike, VecT time_to_expiry, VecT e_rt, VecT n_d2)
     {
         return hn::Mul(
             hn::Set(d, C),
@@ -179,8 +182,8 @@ class FastBlackScholes
     }
 
     template <D d>
-    [[nodiscard]] static inline auto calc_put_rho(
-        auto strike, auto time_to_expiry, auto e_rt, auto n_minus_d2)
+    [[nodiscard]] static inline VecT calc_put_rho(
+        VecT strike, VecT time_to_expiry, VecT e_rt, VecT n_minus_d2)
     {
         return hn::Mul(
             hn::Set(d, C_minus),

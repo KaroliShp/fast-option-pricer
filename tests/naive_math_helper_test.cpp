@@ -13,7 +13,7 @@ class NaiveMathHelperTest : public ::testing::Test
 
 TEST_F(NaiveMathHelperTest, NormalCdf)
 {
-    auto res = NaiveMathHelper::normal_cdf(0);
+    auto res = NaiveMathHelper::normal_cdf<double>(0.0);
     EXPECT_DOUBLE_EQ(0.5, res);
     EXPECT_TRUE(true);
 }
