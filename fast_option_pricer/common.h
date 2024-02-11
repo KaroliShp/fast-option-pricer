@@ -25,7 +25,11 @@ struct OptionPricing
           times_to_expiry(times_to_expiry),
           dividend_yields(dividend_yields),
           prices(std::vector<T>(underlyings.size(), 0)),
-          deltas(std::vector<T>(underlyings.size(), 0))
+          deltas(prices),
+          vegas(prices),
+          thetas(prices),
+          gammas(prices),
+          rhos(prices)
     {
         assert(num_options == strikes.size());
         assert(num_options == risk_free_rates.size());
@@ -43,6 +47,10 @@ struct OptionPricing
     const std::vector<T> dividend_yields;
     std::vector<T> prices;
     std::vector<T> deltas;
+    std::vector<T> vegas;
+    std::vector<T> thetas;
+    std::vector<T> gammas;
+    std::vector<T> rhos;
 };
 
 template <typename T>

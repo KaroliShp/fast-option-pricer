@@ -38,13 +38,23 @@ class NaiveBlackScholes
                 op.prices[i] = calc_call_price(
                     op.underlyings[i], e_qt, n_d1, op.strikes[i], e_rt, n_d2);
                 op.deltas[i] = calc_call_delta(e_qt, n_d1);
+                op.rhos[i] = calc_call_rho(
+                    op.strikes[i], op.times_to_expiry[i], e_rt, n_d2);
             } else {
                 const auto n_minus_d2 = NaiveMathHelper::normal_cdf(-1 * d2);
                 op.prices[i] = calc_put_price(
                     op.underlyings[i], e_qt, n_minus_d1, op.strikes[i], e_rt,
                     n_minus_d2);
                 op.deltas[i] = calc_put_delta(e_qt, n_minus_d1);
+                op.rhos[i] = calc_put_rho(
+                    op.strikes[i], op.times_to_expiry[i], e_rt, n_minus_d2);
             }
+
+            const T pdf_d1 = NaiveMathHelper::normal_pdf(d1);
+            op.gammas[i] =
+                calc_gamma(e_qt, op.strikes[i], sigma_root_t, pdf_d1);
+            op.vegas[i] = calc_vega(
+                op.underlyings[i], e_qt, op.times_to_expiry[i], pdf_d1);
         }
     }
 
@@ -86,6 +96,34 @@ class NaiveBlackScholes
     {
         return -1 * e_qt * n_minus_d1;
     }
+
+    [[nodiscard]] static inline auto calc_gamma(
+        auto e_qt, auto underlying, auto sigma_root_t, auto pdf_d1)
+    {
+        return (e_qt / (underlying * sigma_root_t)) * pdf_d1;
+    }
+
+    [[nodiscard]] static inline auto calc_vega(
+        auto underlying, auto e_qt, auto time_to_expiry, auto pdf_d1)
+    {
+        return C * underlying * e_qt * std::sqrt(time_to_expiry) * pdf_d1;
+    }
+
+    [[nodiscard]] static inline auto calc_call_rho(
+        auto strike, auto time_to_expiry, auto e_rt, auto n_d2)
+    {
+        return C * strike * time_to_expiry * e_rt * n_d2;
+    }
+
+    [[nodiscard]] static inline auto calc_put_rho(
+        auto strike, auto time_to_expiry, auto e_rt, auto n_minus_d2)
+    {
+        return C_minus * strike * time_to_expiry * e_rt * n_minus_d2;
+    }
+
+   protected:
+    static constexpr T C = 1.0 / 100.0;
+    static constexpr T C_minus = -1.0 / 100.0;
 };
 
 }  // namespace fast_option_pricer
